@@ -36,8 +36,7 @@ pub struct Action {
 	command: String,
 
 	/// The backup should wait the action finish before continue with backups? 
-	#[serde(rename = "action")]
-	wait: String
+	wait: bool
 }
 
 /// Try to parse the specified file to a backuper configuration
@@ -46,18 +45,13 @@ pub struct Action {
 /// 
 /// * `path` - The path to for deserialization
 pub fn parse_config(path : String) -> Result<Vec<Config>, String> {
-	// Open the file in read-only mode with buffer
-	let file = match File::open(path) {
-		Ok(f) => f,
+	match File::open(path) {
+		Ok(f) => {
+			match serde_json::from_reader(BufReader::new(f)) {
+				Ok(v) => return Ok(v),
+				Err(e) => return Err(format!("Error parsing the file: {}", e))
+			}
+		},
 		Err(e) => return Err(format!("Error opening the file: {}", e))
-	};
-
-	let reader = BufReader::new(file);
-
-	let cfg : Vec<Config> = match serde_json::from_reader(reader) {
-		Ok(c) => c,
-		Err(e) => return Err(format!("Error parsing the file: {}", e))
-	};
-
-	Ok(cfg)
+	}
 }

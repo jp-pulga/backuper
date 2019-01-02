@@ -5,3 +5,6 @@ authors = ["João Paulo Pulga <joaopaulo1339@outlook.com>"]
 edition = "2018"
 
 [dependencies]
+serde = "*" 
+serde_json = "*"
+serde_derive = "*"

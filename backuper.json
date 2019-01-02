@@ -3,16 +3,16 @@
 		"name": "Example",
 		"path": "C:\\System",
 		"compress": "none",
-		"pre-backup": [
+		"pre_backup": [
 			{
 				"command": "$PATH\\$NAME",
-				"type": "run-and-wait"
+				"wait": true
 			}
 		],
-		"pos-backup": [
+		"post_backup": [
 			{
 				"command": "SomeBin.exe",
-				"type": "run-no-wait"
+				"wait": false
 			}
 		]
 	},
@@ -20,16 +20,16 @@
 		"name": "Example 2",
 		"path": "C:\\Path With Spaces",
 		"compress": "none",
-		"pre-backup": [
+		"pre_backup": [
 			{
 				"command": "$NAME",
-				"type": "run-and-wait"
+				"wait": true
 			}
 		],
-		"pos-backup": [
+		"post_backup": [
 			{
 				"command": "$PATH\\Binary with spaces",
-				"type": "run-no-wait"
+				"wait": false
 			}
 		]
 	}

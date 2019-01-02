@@ -1,0 +1,36 @@
+[
+	{
+		"name": "Example",
+		"path": "C:\\System",
+		"compress": "none",
+		"pre-backup": [
+			{
+				"command": "$PATH\\$NAME",
+				"type": "run-and-wait"
+			}
+		],
+		"pos-backup": [
+			{
+				"command": "SomeBin.exe",
+				"type": "run-no-wait"
+			}
+		]
+	},
+	{
+		"name": "Example 2",
+		"path": "C:\\Path With Spaces",
+		"compress": "none",
+		"pre-backup": [
+			{
+				"command": "$NAME",
+				"type": "run-and-wait"
+			}
+		],
+		"pos-backup": [
+			{
+				"command": "$PATH\\Binary with spaces",
+				"type": "run-no-wait"
+			}
+		]
+	}
+]

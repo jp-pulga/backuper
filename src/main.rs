@@ -17,18 +17,28 @@ use clap::Arg;
 fn main() {
 	let matches = app_from_crate!()
 		.arg(
-			Arg::with_name("config")
+			Arg::with_name("file")
 				.help("Set the configuration file to load")
+				.takes_value(true)
+				.short("f")
+				.long("file")
+				.default_value("backuper.json"),
+		)
+		.arg(
+			Arg::with_name("config")
+				.help("The name of the configuration to backup")
 				.takes_value(true)
 				.short("c")
 				.long("config")
-				.default_value("backuper.json"),
+				.default_value("*"),
 		)
 		.get_matches();
 
-	let cfg = config::parse_config(matches.value_of("config").unwrap().to_string()).unwrap();
+	let cfg = config::parse_config(matches.value_of("file").unwrap().to_string()).unwrap();
+	let filter = matches.value_of("config").unwrap().to_string();
+
 	for c in cfg {
-		if config::is_valid_path(&c) {
+		if config::is_valid_path(&c) && (filter == "*" || c.name == filter) {
 			config::run_pre_backup_tasks(&c);
 			config::do_backup(&c);
 			config::run_post_backup_tasks(&c);

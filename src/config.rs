@@ -80,24 +80,30 @@ pub fn run_post_backup_tasks(cfg: &Config) {
 
 /// Do the backup and crompress
 pub fn do_backup(cfg: &Config) {
-	let len = match &cfg.compress {
-		Some(v) => v.len(),
-		None => 0,
+	match &cfg.compress {
+		Some(v) => match v.len() {
+			0 => do_uncompressed_bakcup(cfg),
+			_ => (),
+		},
+		None => do_uncompressed_bakcup(cfg),
+	};
+}
+
+/// Do the uncompressed backup
+/// AKA: Just copy the folder to destination
+fn do_uncompressed_bakcup(cfg: &Config) {
+	let f = fs_extra::dir::CopyOptions {
+		overwrite: true,
+		skip_exist: false,
+		buffer_size: 4096,
+		copy_inside: true,
+		depth: 0,
 	};
 
-	if len == 0 {
-		let f = fs_extra::dir::CopyOptions {
-			overwrite: true,
-			skip_exist: false,
-			buffer_size: 4096,
-			copy_inside: true,
-			depth: 0,
-		};
-		fs_extra::dir::copy(&cfg.path, &cfg.destination, &f).expect(&format!(
-			"Failed to copy folder '{}' to {}",
-			&cfg.path, &cfg.destination,
-		));
-	}
+	fs_extra::dir::copy(&cfg.path, &cfg.destination, &f).expect(&format!(
+		"Failed to copy folder '{}' to {}",
+		&cfg.path, &cfg.destination,
+	));
 }
 
 /// Action struct

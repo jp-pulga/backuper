@@ -11,3 +11,8 @@ Cargo.lock
 
 /target
 **/*.rs.bk
+
+# Ignore some editors folders/files
+*.cuda-proj
+.vscode/
+*.geany

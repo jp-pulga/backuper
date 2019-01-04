@@ -4,9 +4,9 @@ use std::fs;
 use std::io::Error as IOError;
 use std::io::ErrorKind;
 use std::io::Result as IOResult;
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::{Path, PathBuf};
 
-/// Copy the origina path to de destination path
+/// Copy the origin path to de destination path
 /// If the origin path is an folder, it will pe recursive copied
 ///
 /// # Arguments
@@ -16,13 +16,11 @@ use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 ///
 /// # Remarks
 /// This function assumes that the origin path is valid and exists
-pub fn copy(origin: &String, destination: &String) -> IOResult<()> {
-	let org_path = Path::new(origin);
-
-	if org_path.is_file() {
+pub fn copy(origin: &Path, destination: &Path) -> IOResult<()> {
+	if origin.is_file() {
 		fs::copy(origin, destination)?;
 	} else {
-		copy_folder(org_path, destination)?;
+		copy_folder(origin, destination)?;
 	}
 
 	return Ok(());
@@ -34,35 +32,28 @@ pub fn copy(origin: &String, destination: &String) -> IOResult<()> {
 ///
 /// * `origin` - The origin path
 /// * `destination` - The destination path
-fn copy_folder(origin: &Path, destination: &String) -> IOResult<()> {
+fn copy_folder(origin: &Path, destination: &Path) -> IOResult<()> {
 	ensure_sane_dir_path(destination).expect("Cannot ensure sane destination path");
 
-	let mut v: Vec<PathBuf> = vec![origin.to_path_buf()];
-	let mut size: usize = v.len();
-	let mut i: usize = 0;
-	let base_path = origin.to_str().unwrap();
+	let mut vec: Vec<PathBuf> = vec![origin.to_path_buf()];
 
 	while {
-		if let Some(r) = process_dir(base_path, &v[i], &destination)? {
-			size += r.len();
-			v.extend(r);
+		let to_backup = vec.pop().unwrap();
+		let mut base_dest_path = PathBuf::from(destination);
+		base_dest_path.push(&to_backup.as_path().strip_prefix(origin).unwrap());
+
+		if let Some(r) = process_dir(&to_backup, &mut base_dest_path)? {
+			vec.extend(r);
 		}
 
-		i = i + 1;
-		i != size
+		vec.len() > 0
 	} {}
 
 	Ok(())
 }
 
-fn process_dir(
-	base_path: &str,
-	origin: &Path,
-	destination: &String,
-) -> IOResult<Option<Vec<PathBuf>>> {
+fn process_dir(origin: &Path, destination: &mut PathBuf) -> IOResult<Option<Vec<PathBuf>>> {
 	ensure_sane_dir_path(destination).expect("Cannot ensure sane destination path");
-	create_dir_if_not_exists(destination)
-		.expect(&format!("Cannot create the path {}", destination));
 
 	let mut result: Vec<PathBuf> = Vec::new();
 	for entry in fs::read_dir(&origin)? {
@@ -74,27 +65,13 @@ fn process_dir(
 			continue;
 		}
 
-		let dest_sub_folder_path = format!(
-			"{}{}{}",
-			destination,
-			MAIN_SEPARATOR,
-			origin.strip_prefix(base_path).unwrap().display()
-		);
-		create_dir_if_not_exists(&dest_sub_folder_path)
-			.expect(&format!("Cannot create the path {}", dest_sub_folder_path));
+		create_dir_if_not_exists(&destination.as_path()).expect(&format!(
+			"Cannot create the path {}",
+			&destination.to_str().unwrap()
+		));
 
-		fs::copy(
-			path,
-			format!(
-				"{}{}{}",
-				dest_sub_folder_path,
-				MAIN_SEPARATOR,
-				e.path()
-					.strip_prefix(origin)
-					.expect("Cannot get subfolder path")
-					.display()
-			),
-		)?;
+		destination.push(e.path().strip_prefix(origin).unwrap());
+		fs::copy(path, &destination)?;
 	}
 
 	if result.len() == 0 {
@@ -104,15 +81,13 @@ fn process_dir(
 	Ok(Some(result))
 }
 
-fn ensure_sane_dir_path(path_to_check: &String) -> IOResult<()> {
-	let path = Path::new(path_to_check);
-
-	if path.exists() && path.is_file() {
+fn ensure_sane_dir_path(path_to_check: &Path) -> IOResult<()> {
+	if path_to_check.exists() && path_to_check.is_file() {
 		return Err(IOError::new(
 			ErrorKind::Other,
 			format!(
 				"The destination folder [{}] already exists as an file!",
-				path_to_check
+				path_to_check.display()
 			),
 		));
 	}
@@ -120,9 +95,8 @@ fn ensure_sane_dir_path(path_to_check: &String) -> IOResult<()> {
 	Ok(())
 }
 
-fn create_dir_if_not_exists(path_to_check: &String) -> IOResult<()> {
-	let path = Path::new(path_to_check);
-	if !path.exists() {
+fn create_dir_if_not_exists(path_to_check: &Path) -> IOResult<()> {
+	if !path_to_check.exists() {
 		fs::create_dir(&path_to_check)?;
 	}
 

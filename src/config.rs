@@ -2,6 +2,7 @@
 //! Licensed under the WTFPL License, Version 2.0 <http://www.wtfpl.net/>
 use std::fs::File;
 use std::io::BufReader;
+use std::path::Path;
 use std::process::Command;
 
 use crate::utils;
@@ -93,7 +94,7 @@ pub fn do_backup(cfg: &Config) {
 /// Do the uncompressed backup
 /// AKA: Just copy the folder to destination
 fn do_uncompressed_bakcup(cfg: &Config) {
-	utils::fs::copy(&cfg.path, &cfg.destination).expect("Error in backup");
+	utils::fs::copy(Path::new(&cfg.path), Path::new(&cfg.destination)).expect("Error in backup");
 }
 
 /// Action struct

@@ -33,7 +33,7 @@ pub fn copy(origin: &Path, destination: &Path) -> IOResult<()> {
 /// * `origin` - The origin path
 /// * `destination` - The destination path
 fn copy_folder(origin: &Path, destination: &Path) -> IOResult<()> {
-	ensure_sane_dir_path(destination).expect("Cannot ensure sane destination path");
+	ensure_sane_dir_path(destination)?;
 
 	let mut vec: Vec<PathBuf> = vec![origin.to_path_buf()];
 
@@ -52,8 +52,17 @@ fn copy_folder(origin: &Path, destination: &Path) -> IOResult<()> {
 	Ok(())
 }
 
+/// Process files and folders in some directory
+///
+/// # Arguments
+///
+/// * `origin` - The origin path
+/// * `destination` - The destination path
+///
+/// # Returns
+/// All the folders inside this folders to process later
 fn process_dir(origin: &Path, destination: &mut PathBuf) -> IOResult<Option<Vec<PathBuf>>> {
-	ensure_sane_dir_path(destination).expect("Cannot ensure sane destination path");
+	ensure_sane_dir_path(destination)?;
 
 	let mut result: Vec<PathBuf> = Vec::new();
 	for entry in fs::read_dir(&origin)? {
@@ -65,13 +74,10 @@ fn process_dir(origin: &Path, destination: &mut PathBuf) -> IOResult<Option<Vec<
 			continue;
 		}
 
-		create_dir_if_not_exists(&destination.as_path()).expect(&format!(
-			"Cannot create the path {}",
-			&destination.to_str().unwrap()
-		));
+		create_dir_if_not_exists(&destination.as_path())?;
 
-		destination.push(e.path().strip_prefix(origin).unwrap());
-		fs::copy(path, &destination)?;
+		destination.push(&path.strip_prefix(origin).unwrap());
+		fs::copy(&path, &destination)?;
 	}
 
 	if result.len() == 0 {
@@ -81,6 +87,7 @@ fn process_dir(origin: &Path, destination: &mut PathBuf) -> IOResult<Option<Vec<
 	Ok(Some(result))
 }
 
+/// Ensure we dont try to write in a file
 fn ensure_sane_dir_path(path_to_check: &Path) -> IOResult<()> {
 	if path_to_check.exists() && path_to_check.is_file() {
 		return Err(IOError::new(
@@ -95,6 +102,7 @@ fn ensure_sane_dir_path(path_to_check: &Path) -> IOResult<()> {
 	Ok(())
 }
 
+/// Cretae the specified directory if the it not exist
 fn create_dir_if_not_exists(path_to_check: &Path) -> IOResult<()> {
 	if !path_to_check.exists() {
 		fs::create_dir(&path_to_check)?;

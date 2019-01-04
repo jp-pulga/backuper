@@ -11,6 +11,7 @@ extern crate serde_derive;
 extern crate clap;
 
 pub mod config;
+pub mod utils;
 
 use clap::Arg;
 

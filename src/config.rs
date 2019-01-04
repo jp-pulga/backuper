@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::process::Command;
 
+use crate::utils;
 use serde_derive;
 
 /// Configuration struct
@@ -92,18 +93,7 @@ pub fn do_backup(cfg: &Config) {
 /// Do the uncompressed backup
 /// AKA: Just copy the folder to destination
 fn do_uncompressed_bakcup(cfg: &Config) {
-	let f = fs_extra::dir::CopyOptions {
-		overwrite: true,
-		skip_exist: false,
-		buffer_size: 4096,
-		copy_inside: true,
-		depth: 0,
-	};
-
-	fs_extra::dir::copy(&cfg.path, &cfg.destination, &f).expect(&format!(
-		"Failed to copy folder '{}' to {}",
-		&cfg.path, &cfg.destination,
-	));
+	utils::fs::copy(&cfg.path, &cfg.destination).expect("Error in backup");
 }
 
 /// Action struct

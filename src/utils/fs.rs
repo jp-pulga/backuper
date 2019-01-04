@@ -102,7 +102,7 @@ fn ensure_sane_dir_path(path_to_check: &Path) -> IOResult<()> {
 	Ok(())
 }
 
-/// Cretae the specified directory if the it not exist
+/// Create the specified directory if the it not exist
 fn create_dir_if_not_exists(path_to_check: &Path) -> IOResult<()> {
 	if !path_to_check.exists() {
 		fs::create_dir(&path_to_check)?;

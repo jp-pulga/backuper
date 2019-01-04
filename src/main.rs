@@ -10,7 +10,8 @@ extern crate serde_derive;
 #[macro_use]
 extern crate clap;
 
-pub mod config;
+pub mod backup;
+pub mod compressors;
 pub mod utils;
 
 use clap::Arg;
@@ -35,14 +36,14 @@ fn main() {
 		)
 		.get_matches();
 
-	let cfg = config::parse_config(matches.value_of("file").unwrap().to_string()).unwrap();
+	let cfg = backup::backup::parse_config(matches.value_of("file").unwrap().to_string()).unwrap();
 	let filter = matches.value_of("config").unwrap().to_string();
 
 	for c in cfg {
-		if config::is_valid_path(&c) && (filter == "*" || c.name == filter) {
-			config::run_pre_backup_tasks(&c);
-			config::do_backup(&c);
-			config::run_post_backup_tasks(&c);
+		if c.is_valid_path() && (filter == "*" || c.name == filter) {
+			c.run_pre_backup_tasks();
+			c.do_backup();
+			c.run_post_backup_tasks();
 
 			println!("The task '{}' is sucefull backuped!", c.name)
 		} else {

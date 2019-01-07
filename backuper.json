@@ -3,7 +3,7 @@
 		"name": "Example",
 		"path": "C:\\System",
 		"destination": "C:\\Backups",
-		"compress": "none",
+		"compress": "None",
 		"pre_backup": [
 			{
 				"command": "$PATH\\$NAME",
@@ -21,7 +21,7 @@
 		"name": "Example 2",
 		"path": "C:\\Path With Spaces",
 		"destination": "C:\\Backups",
-		"compress": "none",
+		"compress": "None",
 		"pre_backup": [
 			{
 				"command": "$NAME",

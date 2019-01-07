@@ -1,8 +1,18 @@
 //! Compressor mod
 //! All compressors going to be here
 
+pub mod uncompressed;
+pub mod gzip;
+
+use std::boxed::Box;
+use std::path::Path;
+use serde_derive::Deserialize;
+
+use crate::compressors::uncompressed::Uncompressed;
+use crate::compressors::gzip::Gzip;
+
 /// The type of compression used for backup files
-#[derive(Debug, Deserialize)]
+#[derive(Copy, Clone, Debug, Deserialize)]
 pub enum CompressType {
 	/// Dont comrpess anithing
 	None = 0,
@@ -18,4 +28,35 @@ pub enum CompressType {
 
 	/// GZip with deflate compress
 	Gzip = 4,
+}
+
+type CompressResult<T> = Result<T, &'static str>;
+
+/// Comprensable trait
+pub trait Comprensable {
+	/// Compress some data to backp destination
+	fn compress(&self, org: &Path, dest: &Path) -> CompressResult<()>;
+}
+
+/// Get the compress by its type
+pub fn get_compress_by_type(t: Option<CompressType>) -> Box<Comprensable + 'static> {
+	if t.is_none() {
+		let c: Uncompressed = Default::default();
+		return Box::new(c);
+	}
+
+	match t.unwrap() {
+		CompressType::None => {
+			let c: Uncompressed = Default::default();
+			return Box::new(c);
+		},
+		CompressType::Gzip => {
+			let c: Gzip = Default::default();
+			return Box::new(c);
+		},
+		_ => {
+			let c: Uncompressed = Default::default();
+			return Box::new(c);
+		}
+	}
 }

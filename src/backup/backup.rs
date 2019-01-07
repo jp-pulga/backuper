@@ -1,15 +1,14 @@
 //! Backup module
 
-use std::path::PathBuf;
-use std::process::Command;
-use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::PathBuf;
+use std::process::Command;
 
-use serde;
+use serde_derive::Deserialize;
+use walkdir::WalkDir;
 
-use crate::compressors::CompressType;
-use crate::utils;
+use crate::compressors::*;
 
 /// This structs store all we need to know
 /// about some backup
@@ -32,7 +31,7 @@ pub struct Backup {
 	pre_backup: Option<Vec<Action>>,
 
 	/// Post backup actions
-	post_backup: Option<Vec<Action>>
+	post_backup: Option<Vec<Action>>,
 }
 
 /// Action struct
@@ -99,22 +98,22 @@ impl Backup {
 
 	/// Do the backup and crompress
 	pub fn do_backup(&self) {
-		match &self.compress {
-			Some(v) => match v {
-				CompressType::None => self.do_uncompressed_bakcup(),
-				_ => (),
-			},
-			None => self.do_uncompressed_bakcup(),
-		};
-	}
+		self.run_pre_backup_tasks();
 
-	/// Do the uncompressed backup
-	/// AKA: Just copy the folder to destination
-	fn do_uncompressed_bakcup(&self) {
-		utils::fs::copy(Path::new(&self.path), Path::new(&self.destination)).expect("Error in backup");
+		let c = get_compress_by_type(self.compress);
+		let base_org_path = &self.path.as_path();
+
+		for dir in WalkDir::new(&self.path) {
+			let entry = dir.unwrap();
+			let mut base_dest_path = self.destination.clone();
+			base_dest_path.push(entry.path().strip_prefix(base_org_path).unwrap());
+
+			c.compress(&entry.path(), &base_dest_path.as_path()).unwrap();
+		}
+
+		self.run_post_backup_tasks();
 	}
 }
-
 
 /// Try to parse the specified file to a backuper configuration
 ///

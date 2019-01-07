@@ -2,7 +2,7 @@
 //! We only need move the folder specified to peform a backup
 
 use crate::compressors::{Comprensable, CompressResult};
-//use std::io::File;
+use std::fs::{copy, create_dir};
 use std::path::Path;
 
 /// Struct for handle uncomprensed data
@@ -10,8 +10,14 @@ use std::path::Path;
 pub struct Uncompressed;
 
 impl Comprensable for Uncompressed {
-	fn compress(&self, org: &Path, dest: &Path) -> CompressResult<()> {
+	fn compress(&self, org: &Path, dest: &Path) -> CompressResult {
 		println!("Coping {} to {}", org.display(), dest.display());
+
+		if org.is_dir() {
+			create_dir(dest)?;
+		} else {
+			copy(org, dest)?;
+		}
 
 		Ok(())
 	}

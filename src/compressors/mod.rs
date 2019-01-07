@@ -30,12 +30,12 @@ pub enum CompressType {
 	Gzip = 4,
 }
 
-type CompressResult<T> = Result<T, &'static str>;
+type CompressResult = std::io::Result<()>;
 
 /// Comprensable trait
 pub trait Comprensable {
 	/// Compress some data to backp destination
-	fn compress(&self, org: &Path, dest: &Path) -> CompressResult<()>;
+	fn compress(&self, org: &Path, dest: &Path) -> CompressResult;
 }
 
 /// Get the compress by its type

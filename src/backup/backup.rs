@@ -1,6 +1,6 @@
 //! Backup module
 
-use std::fs::{create_dir, File};
+use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::process::Command;
@@ -108,12 +108,8 @@ impl Backup {
 			let mut base_dest_path = self.destination.clone();
 			base_dest_path.push(entry.path().strip_prefix(base_org_path).unwrap());
 
-			if entry.path().is_dir() {
-				create_dir(base_dest_path).expect("Cannot create destination dir");
-			} else {
-				c.compress(&entry.path(), &base_dest_path.as_path())
-					.unwrap();
-			}
+			c.compress(&entry.path(), &base_dest_path.as_path())
+				.unwrap();
 		}
 
 		self.run_post_backup_tasks();

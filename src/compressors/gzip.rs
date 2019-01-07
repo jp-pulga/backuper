@@ -9,7 +9,7 @@ use std::path::Path;
 pub struct Gzip;
 
 impl Comprensable for Gzip {
-	fn compress(&self, org: &Path, dest: &Path) -> CompressResult<()> {
+	fn compress(&self, org: &Path, dest: &Path) -> CompressResult {
 		println!("Coping {} to {}", org.display(), dest.display());
 
 		Ok(())

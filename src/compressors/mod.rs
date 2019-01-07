@@ -1,15 +1,15 @@
 //! Compressor mod
 //! All compressors going to be here
 
-pub mod uncompressed;
 pub mod gzip;
+pub mod uncompressed;
 
+use serde_derive::Deserialize;
 use std::boxed::Box;
 use std::path::Path;
-use serde_derive::Deserialize;
 
-use crate::compressors::uncompressed::Uncompressed;
 use crate::compressors::gzip::Gzip;
+use crate::compressors::uncompressed::Uncompressed;
 
 /// The type of compression used for backup files
 #[derive(Copy, Clone, Debug, Deserialize)]
@@ -49,11 +49,11 @@ pub fn get_compress_by_type(t: Option<CompressType>) -> Box<Comprensable + 'stat
 		CompressType::None => {
 			let c: Uncompressed = Default::default();
 			return Box::new(c);
-		},
+		}
 		CompressType::Gzip => {
 			let c: Gzip = Default::default();
 			return Box::new(c);
-		},
+		}
 		_ => {
 			let c: Uncompressed = Default::default();
 			return Box::new(c);

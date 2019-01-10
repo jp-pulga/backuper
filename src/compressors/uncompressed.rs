@@ -25,4 +25,6 @@ impl Comprensable for Uncompressed {
 
 		Ok(())
 	}
+
+	fn finish(&mut self) {}
 }

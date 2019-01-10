@@ -56,21 +56,7 @@ impl Backup {
 	/// Run all pre-build task registred for the backup
 	pub fn run_pre_backup_tasks(&self) {
 		match &self.pre_backup {
-			Some(values) => {
-				for v in values {
-					if v.wait {
-						Command::new(&v.command)
-							.spawn()
-							.expect("Error spwaining the process")
-							.wait()
-							.expect("Error in process");
-					} else {
-						Command::new(&v.command)
-							.spawn()
-							.expect("Error spwaining the process");
-					}
-				}
-			}
+			Some(values) => self.run_actions(values),
 			None => (),
 		}
 	}
@@ -78,21 +64,7 @@ impl Backup {
 	/// Run all post-build task registred for the backup
 	pub fn run_post_backup_tasks(&self) {
 		match &self.post_backup {
-			Some(values) => {
-				for v in values {
-					if v.wait {
-						Command::new(&v.command)
-							.spawn()
-							.expect("Error spwaining the process")
-							.wait()
-							.expect("Error in process");
-					} else {
-						Command::new(&v.command)
-							.spawn()
-							.expect("Error spwaining the process");
-					}
-				}
-			}
+			Some(values) => self.run_actions(values),
 			None => (),
 		}
 	}
@@ -114,7 +86,24 @@ impl Backup {
 				.unwrap();
 		}
 
+		c.finish();
 		self.run_post_backup_tasks();
+	}
+
+	fn run_actions(&self, actions: &Vec<Action>) {
+		for v in actions {
+			if v.wait {
+				Command::new(&v.command)
+					.spawn()
+					.expect("Error spwaining the process")
+					.wait()
+					.expect("Error in process");
+			} else {
+				Command::new(&v.command)
+					.spawn()
+					.expect("Error spwaining the process");
+			}
+		}
 	}
 }
 

@@ -43,4 +43,9 @@ impl Comprensable for Zip {
 		self.destination = Some(dst);
 		Ok(())
 	}
+
+	fn finish(&mut self) {
+		let mut dst = self.destination.take().unwrap();
+		dst.finish().unwrap();
+	}
 }

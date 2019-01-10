@@ -31,6 +31,9 @@ pub trait Comprensable {
 
 	/// Compress some data to backp destination
 	fn compress(&mut self, org: &Path, dest: &Path) -> CompressResult;
+
+	/// Finish the compression
+	fn finish(&mut self);
 }
 
 /// Get the compress by its type

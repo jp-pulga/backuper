@@ -11,19 +11,17 @@ use zip;
 
 /// Struct for handle uncomprensed data
 #[derive(Default)]
-pub struct Bzip {
+pub struct Zip {
+	/// Options for write the zip file
+	pub options: Option<zip::write::FileOptions>,
 	destination: Option<zip::ZipWriter<File>>,
-	options: Option<zip::write::FileOptions>,
 }
 
-impl Comprensable for Bzip {
+impl Comprensable for Zip {
 	fn init(&mut self, bkp: &Backup) {
-		self.destination = Some(zip::ZipWriter::new(File::create(&bkp.destination).expect("Cannot create file")));
-		self.options = Some(
-			zip::write::FileOptions::default()
-				.compression_method(zip::CompressionMethod::Bzip2)
-				.unix_permissions(0o755),
-		);
+		self.destination = Some(zip::ZipWriter::new(
+			File::create(&bkp.destination).expect("Cannot create file"),
+		));
 	}
 
 	fn compress(&mut self, org: &Path, _dest: &Path) -> CompressResult {

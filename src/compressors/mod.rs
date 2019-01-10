@@ -1,7 +1,7 @@
 //! Compressor mod
 //! All compressors going to be here
 
-pub mod bzip;
+pub mod compressed;
 pub mod uncompressed;
 
 use serde_derive::Deserialize;
@@ -9,26 +9,17 @@ use std::boxed::Box;
 use std::path::Path;
 
 use crate::backup::backup::Backup;
-use crate::compressors::bzip::Bzip;
+use crate::compressors::compressed::Zip;
 use crate::compressors::uncompressed::Uncompressed;
 
 /// The type of compression used for backup files
 #[derive(Copy, Clone, Debug, Deserialize)]
 pub enum CompressType {
-	/// Dont comrpess anithing
-	None = 0,
-
 	/// Zip with deflate compress
 	Zip = 1,
 
-	/// Zip with lmza2 compress
-	SevenZip = 2,
-
 	/// BZip with deflate compress
-	Bzip = 3,
-
-	/// GZip with deflate compress
-	Gzip = 4,
+	Bzip = 2,
 }
 
 type CompressResult = std::io::Result<()>;
@@ -49,18 +40,22 @@ pub fn get_compress_by_type(t: Option<CompressType>) -> Box<Comprensable + 'stat
 		return Box::new(c);
 	}
 
+	let mut c: Zip = Default::default();
 	match t.unwrap() {
-		CompressType::None => {
-			let c: Uncompressed = Default::default();
-			return Box::new(c);
+		CompressType::Zip => {
+			c.options = Some(
+				zip::write::FileOptions::default()
+					.compression_method(zip::CompressionMethod::Deflated)
+					.unix_permissions(0o755),
+			);
 		}
 		CompressType::Bzip => {
-			let c: Bzip = Default::default();
-			return Box::new(c);
-		}
-		_ => {
-			let c: Uncompressed = Default::default();
-			return Box::new(c);
+			c.options = Some(
+				zip::write::FileOptions::default()
+					.compression_method(zip::CompressionMethod::Bzip2)
+					.unix_permissions(0o755),
+			);
 		}
 	}
+	return Box::new(c);
 }

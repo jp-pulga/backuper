@@ -7,6 +7,7 @@ use std::process::Command;
 
 use serde_derive::Deserialize;
 use walkdir::WalkDir;
+use zip;
 
 use crate::compressors::*;
 

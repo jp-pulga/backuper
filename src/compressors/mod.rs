@@ -1,14 +1,15 @@
 //! Compressor mod
 //! All compressors going to be here
 
-pub mod gzip;
+pub mod bzip;
 pub mod uncompressed;
 
 use serde_derive::Deserialize;
 use std::boxed::Box;
 use std::path::Path;
 
-use crate::compressors::gzip::Gzip;
+use crate::backup::backup::Backup;
+use crate::compressors::bzip::Bzip;
 use crate::compressors::uncompressed::Uncompressed;
 
 /// The type of compression used for backup files
@@ -34,8 +35,11 @@ type CompressResult = std::io::Result<()>;
 
 /// Comprensable trait
 pub trait Comprensable {
+	/// Init the
+	fn init(&mut self, bkp: &Backup);
+
 	/// Compress some data to backp destination
-	fn compress(&self, org: &Path, dest: &Path) -> CompressResult;
+	fn compress(&mut self, org: &Path, dest: &Path) -> CompressResult;
 }
 
 /// Get the compress by its type
@@ -50,8 +54,8 @@ pub fn get_compress_by_type(t: Option<CompressType>) -> Box<Comprensable + 'stat
 			let c: Uncompressed = Default::default();
 			return Box::new(c);
 		}
-		CompressType::Gzip => {
-			let c: Gzip = Default::default();
+		CompressType::Bzip => {
+			let c: Bzip = Default::default();
 			return Box::new(c);
 		}
 		_ => {

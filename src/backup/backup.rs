@@ -19,10 +19,10 @@ pub struct Backup {
 	pub name: String,
 
 	/// The path to backup
-	path: PathBuf,
+	pub path: PathBuf,
 
 	/// The destination for all backups files
-	destination: PathBuf,
+	pub destination: PathBuf,
 
 	/// The compress algorithm
 	compress: Option<CompressType>,
@@ -100,8 +100,9 @@ impl Backup {
 	pub fn do_backup(&self) {
 		self.run_pre_backup_tasks();
 
-		let c = get_compress_by_type(self.compress);
 		let base_org_path = &self.path.as_path();
+		let mut c = get_compress_by_type(self.compress);
+		c.init(&self);
 
 		for dir in WalkDir::new(&self.path).follow_links(true) {
 			let entry = dir.unwrap();
